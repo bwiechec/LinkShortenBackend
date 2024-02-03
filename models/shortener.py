@@ -19,7 +19,7 @@ def individual_serial(shortenUrl) -> dict:
         "name": shortenUrl["name"],
         "url": shortenUrl["url"],
         "timestamp": shortenUrl["timestamp"],
-        "click_count": shortenUrl["click_count"]
+        "click_count": shortenUrl["click_count"] if "click_count" in shortenUrl else 0
     }
 
 def list_serial(shortenUrls) -> list:

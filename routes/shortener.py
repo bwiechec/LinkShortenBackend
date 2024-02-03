@@ -92,6 +92,7 @@ async def delete_shorten_url(id: str):
     
 @router.get("/{id}", include_in_schema=False)
 async def redirect_to_shorten_url(id: str):
-    shorten_url = collection.find_one({"_id": ObjectId(id)})        
-    collection.update_one({"_id": ObjectId(id)}, {"$set": {"click_count": shorten_url["click_count"] + 1}})
+    shorten_url = collection.find_one({"_id": ObjectId(id)})
+    click_count = shorten_url["click_count"] + 1 if "click_count" in shorten_url else 1    
+    collection.update_one({"_id": ObjectId(id)}, {"$set": {"click_count": click_count}})
     return RedirectResponse(url=shorten_url['url'], status_code=302)
