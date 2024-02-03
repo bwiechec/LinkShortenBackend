@@ -42,6 +42,9 @@ async def add_shorten_url(shorten_url: Shortener):
         url = shorten_url["url"]
         timestamp = shorten_url["timestamp"]
 
+        if "click_count" not in shorten_url:
+            shorten_url["click_count"] = 0
+
         if (len(name) == 0 or len(url) == 0 or len(timestamp) == 0):
             raise HTTPException(status_code=400, detail="All fields must be filled")
 
@@ -89,5 +92,6 @@ async def delete_shorten_url(id: str):
     
 @router.get("/{id}", include_in_schema=False)
 async def redirect_to_shorten_url(id: str):
-    shorten_url = collection.find_one({"_id": ObjectId(id)})
+    shorten_url = collection.find_one({"_id": ObjectId(id)})        
+    collection.update_one({"_id": ObjectId(id)}, {"$set": {"click_count": shorten_url["click_count"] + 1}})
     return RedirectResponse(url=shorten_url['url'], status_code=302)

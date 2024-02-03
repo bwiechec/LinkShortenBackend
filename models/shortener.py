@@ -5,11 +5,13 @@ class Shortener(BaseModel):
     name: str
     url: str
     timestamp: str
+    click_count: int
 
 class OptionalShortener(BaseModel):   
     name: Optional[str] = None
     url: Optional[str] = None
     timestamp: Optional[str] = None
+    click_count: Optional[int] = None
 
 def individual_serial(shortenUrl) -> dict:
     return {
@@ -17,6 +19,7 @@ def individual_serial(shortenUrl) -> dict:
         "name": shortenUrl["name"],
         "url": shortenUrl["url"],
         "timestamp": shortenUrl["timestamp"],
+        "click_count": shortenUrl["click_count"]
     }
 
 def list_serial(shortenUrls) -> list:
