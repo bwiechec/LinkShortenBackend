@@ -16,22 +16,30 @@ router = APIRouter()
 #GET ALL
 @router.get("/api/shorteners", tags=["Shorteners"])
 async def get_shorten_urls(filter: OptionalShortener = Depends(), order_by: Optional[str] = None, order: Optional[str] = 'asc'):
-    # Create a filter if filter_field and filter_value are provided
-    query_filter = {k: v for k, v in filter.model_dump().items() if v is not None}
+    try:
+        # Create a filter if filter_field and filter_value are provided
+        query_filter = {k: v for k, v in filter.model_dump().items() if v is not None}
 
-    # Determine the sort order
-    sort_order = ASCENDING if order == 'asc' else DESCENDING
+        # Determine the sort order
+        sort_order = ASCENDING if order == 'asc' else DESCENDING
 
-    # Query the collection with filter and sort
-    shorteners = collection.find(query_filter).sort(order_by, sort_order) if order_by else collection.find(query_filter)
+        # Query the collection with filter and sort
+        shorteners = collection.find(query_filter).sort(order_by, sort_order) if order_by else collection.find(query_filter)
 
-    return list_serial(shorteners)
+        return list_serial(shorteners)
+
+    except HTTPException as e:
+        raise HTTPException(status_code=500, detail=e.detail)
 
 #GET SINGLE 
 @router.get("/api/shorteners/{id}", tags=["Shorteners"])
 async def get_shorten_url(id: str):
-    shorteners = collection.find({"_id": ObjectId(id)})
-    return list_serial(shorteners)
+    try:
+        shorteners = collection.find({"_id": ObjectId(id)})
+        return list_serial(shorteners)
+
+    except HTTPException as e:
+        raise HTTPException(status_code=500, detail=e.detail)
 
 #Post request method
 @router.post("/api/shorteners", tags=["Shorteners"])
@@ -92,7 +100,11 @@ async def delete_shorten_url(id: str):
     
 @router.get("/{id}", include_in_schema=False)
 async def redirect_to_shorten_url(id: str):
-    shorten_url = collection.find_one({"_id": ObjectId(id)})
-    click_count = shorten_url["click_count"] + 1 if "click_count" in shorten_url else 1    
-    collection.update_one({"_id": ObjectId(id)}, {"$set": {"click_count": click_count}})
-    return RedirectResponse(url=shorten_url['url'], status_code=302)
+    try:
+        shorten_url = collection.find_one({"_id": ObjectId(id)})
+        click_count = shorten_url["click_count"] + 1 if "click_count" in shorten_url else 1    
+        collection.update_one({"_id": ObjectId(id)}, {"$set": {"click_count": click_count}})
+        return RedirectResponse(url=shorten_url['url'], status_code=302)
+
+    except HTTPException as e:
+        raise HTTPException(status_code=500, detail=e.detail)
